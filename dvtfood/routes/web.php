@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CategoryProductController;
+use App\Http\Controllers\ShoppingCartController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,3 +16,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get("/", [CategoryProductController::class, "index"]);
+
+Route::get("/shopping-cart", [ShoppingCartController::class, "index"]);
