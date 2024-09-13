@@ -14,6 +14,6 @@ class Product extends Model
         "des",
         "img",
         "category_id",
-        "price"
+        "price",
     ];
 }

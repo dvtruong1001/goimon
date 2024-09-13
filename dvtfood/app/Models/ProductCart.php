@@ -11,7 +11,8 @@ class ProductCart extends Model
     protected $table = "product_cart";
     protected $fillable = [
         "product_id",
-        "cart_token"
+        "cart_token",
+        "product_count"
     ];
 
     protected $casts = [

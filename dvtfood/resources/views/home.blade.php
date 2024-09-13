@@ -167,14 +167,48 @@
         </section>
         <!-- /.content -->
     </div>
-
+    @section('script')
     <script>
         $(document).ready(function() {
             $(".btn-addtocart").click(function(e) {
-                
+                const product_id = $(this).data('id');
                 e.preventDefault();
+                console.log("product_id", product_id);
+                
+                $.ajax({
+                    type: "get",
+                    url: "{{ route('addtocart') }}",
+                    data: {
+                        user_token: getCookie('user_token'),
+                        product_id: product_id
+                    },
+                    dataType: "json",
+                    success: function(response, textStatus, jqXHR) {
+
+                        Toast.fire({
+                            icon: 'success',
+                            html: '<span class="text-success">'+ response.message + '</span>'
+                        })
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+
+                        const obj = JSON.parse(jqXHR.responseText);
+
+                        Swal.fire({
+                            title: 'Error',
+                            text: obj.message,
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+
+
+                        // console.log('jqXHR:', jqXHR.responseText);
+                    }
+                });
+
             })
         })
     </script>
+    @endsection
     <!-- /.content-wrapper -->
 @endsection()

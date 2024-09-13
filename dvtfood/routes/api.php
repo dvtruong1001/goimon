@@ -3,6 +3,7 @@
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ShoppingCartController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,4 +17,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-Route::get("/addtocart/{token}/{product}", [UserController::class,"addToCart"]);
+Route::get("/cart/addtocart", [ShoppingCartController::class,"addToCart"])->name('addtocart');
+Route::get('/cart/updateproduct', [ShoppingCartController::class, "updateProductCart"])->name("updateproduct");
+Route::post("/auth/login", [UserController::class, "tryLogin"])->name('login');

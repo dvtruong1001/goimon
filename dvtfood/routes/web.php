@@ -1,8 +1,10 @@
 <?php
 
-use App\Http\Controllers\CategoryProductController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ShoppingCartController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Cookie;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -15,6 +17,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get("/", [CategoryProductController::class, "index"]);
 
-Route::get("/shopping-cart", [ShoppingCartController::class, "index"]);
+Route::get("/", [HomeController::class, "index"])->middleware('auth.cookie');
+Route::get("/home", [HomeController::class, "index"])->middleware('auth.cookie')->name("home");
+
+
+Route::get("/shopping-cart", [ShoppingCartController::class, "index"])->middleware('auth.cookie')->name('shopping-cart');
+
+Route::get("/login", function(){
+    return view("login");
+})->name("login");
