@@ -7,12 +7,13 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use App\Models\User;
+use Illuminate\Support\Str;
 class ShoppingCartController extends Controller
 {
     //
     public function index(Request $request)
     {
-        $shopping_carts = ShoppingCart::where("owner", "=", "haha")->orderByDesc("id")->limit(5)->get();
+        $shopping_carts = ShoppingCart::where("owner", "=", $request->attributes->get("authenticatedUser")->token)->orderByDesc("id")->limit(5)->get();
         $product_carts = ProductCart::all();
         $products = [];
         foreach ($shopping_carts as $cart) {
@@ -98,6 +99,151 @@ class ShoppingCartController extends Controller
         }
 
         return response()->json(["message" => "Lỗi yêu cầu"], 401);
+    }
+
+    public function removeproduct(Request $request)
+    {
+        $users = User::where("token", "=", $request->user_token);
+        if ($users->count() <= 0) {
+            return response()->json(["message" => "Token không hợp lệ"], 401);
+        }
+
+        $product = ProductCart::where("id", $request->product_id)->where("cart_token", $request->cart_token)->first();
+        if ($product->count() <= 0) {
+            return response()->json(["message" => "Sản phẩm này không tồn tại hoặc đã được gỡ xuống"], 401);
+        }
+
+
+        $product->delete();
+
+    }
+
+    public function removeCart(Request $request)
+    {
+        $users = User::where("token", "=", $request->user_token);
+        if ($users->count() <= 0) {
+            return response()->json(["message" => "Token không hợp lệ"], 401);
+        }
+
+        $cart = ShoppingCart::where("token", $request->cart_token)->first();
+        if (!$cart) {
+            return response()->json(
+                [
+                    "message" => "Đơn hàng không tồn tại",
+                    "status" => "error"
+                ],
+                404
+            );
+        }
+
+        if ($cart->status != 2) {
+            return response()->json(
+                [
+                    "message" => "Đơn hàng này chưa được thanh toán",
+                    "status" => "error"
+                ],
+                404
+            );
+        }
+
+        
+        $cart->delete();
+
+        return response()->json(
+            [
+                "message" => "Thanh cong",
+                "status" => "success"
+            ],
+            200
+        );
+    }
+
+    public function checkPayCart(Request $request)
+    {
+        $users = User::where("token", "=", $request->user_token);
+        if ($users->count() <= 0) {
+            return response()->json(["message" => "Token không hợp lệ"], 401);
+        }
+
+        $cart = ShoppingCart::where("token", $request->cart_token)->first();
+        if (!$cart) {
+            return response()->json(
+                [
+                    "message" => "Đơn hàng không tồn tại",
+                    "status" => "error"
+                ],
+                404
+            );
+        }
+
+        if ($cart->status == 0) {
+            return response()->json(
+                [
+                    "message" => "Đơn hàng này chưa được đóng",
+                    "status" => "error"
+                ],
+                404
+            );
+        }
+
+        if ($cart->status == 2) {
+            return response()->json(
+                [
+                    "status" => "success",
+                    "message" => "Đã thanh toán"
+                ],
+                200
+            );
+        }
+
+        return response()->json(
+            [
+                "status" => "error",
+                "message" => "Chưa thanh toán"
+            ],
+            404
+        );
+
+    }
+
+    public function confirmCart(Request $request)
+    {
+        $users = User::where("token", "=", $request->user_token);
+        if ($users->count() <= 0) {
+            return response()->json(["message" => "Token không hợp lệ"], 401);
+        }
+
+        $cart = ShoppingCart::where("token", $request->cart_token)->first();
+        if (!$cart) {
+            return response()->json(
+                [
+                    "message" => "Đơn hàng không tồn tại",
+                    "status" => "error"
+                ],
+                404
+            );
+        }
+
+        if ($cart->status != 0) {
+            return response()->json(
+                [
+                    "message" => "Đơn hàng này đã được đóng",
+                    "status" => "error"
+                ],
+                404
+            );
+        }
+
+        $cart->status = 1;
+        $cart->save();
+
+        return response()->json(
+            [
+                "message" => "Thanh cong",
+                "status" => "success"
+            ],
+            200
+        );
     }
 
     public function updateProductCart(Request $request)

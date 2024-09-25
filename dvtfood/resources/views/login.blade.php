@@ -65,8 +65,8 @@
             $("#login-form").submit(function(e) {
                 e.preventDefault();
                 $.ajax({
-                    type: "post",
-                    url: "{{ route('login') }}",
+                    type: "POST",
+                    url: "{{ route('apilogin') }}",
                     data: {
                         phone: $("#phone").val(),
                         password: $("#password").val()

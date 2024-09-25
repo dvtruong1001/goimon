@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Cookie;
 Route::get("/", [HomeController::class, "index"])->middleware('auth.cookie');
 Route::get("/home", [HomeController::class, "index"])->middleware('auth.cookie')->name("home");
 
+Route::get("/search", [HomeController::class, "search"])->middleware('auth.cookie')->name("search");
 
 Route::get("/shopping-cart", [ShoppingCartController::class, "index"])->middleware('auth.cookie')->name('shopping-cart');
 

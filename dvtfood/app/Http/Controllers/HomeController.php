@@ -20,4 +20,19 @@ class HomeController extends Controller
             "authenticatedUser" => $request->attributes->get('authenticatedUser')
         ]);
     }
+
+    public function search(Request $request)
+    {
+        $products = Product::where("name", "LIKE", "%" . $request->search . "%")->orWhere("des", "LIKE", "%" . $request->search . "%")->get();
+        $categories = [];
+
+        foreach($products as $product) {
+            $categories[] = Category::where("id", $product->id)->first();
+        }
+        return view("home", [
+            "categories" => $categories,
+            "products" => $products,
+            "authenticatedUser" => $request->attributes->get('authenticatedUser')
+        ]);
+    }
 }

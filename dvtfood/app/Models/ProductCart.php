@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class ProductCart extends Model
 {
     use HasFactory;
-    protected $table = "product_cart";
+    
     protected $fillable = [
         "product_id",
         "cart_token",
@@ -16,6 +16,6 @@ class ProductCart extends Model
     ];
 
     protected $casts = [
-        'create_at' => 'datetime',
+        'created_at' => 'datetime',
     ];
 }

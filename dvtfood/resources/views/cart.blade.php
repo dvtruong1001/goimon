@@ -33,7 +33,7 @@
                                                 @if ($cart->status == 0) class="badge badge-warning"
                                             @else
                                                 class="badge badge-success" @endif>{{ $cart->token }}</span>
-                                            <small class="float-right">Tạo vào lúc: {{ $cart->create_at }}</small>
+                                            <small class="float-right">Tạo vào lúc: {{ $cart->created_at }}</small>
                                         </h4>
                                     </div>
                                     <!-- /.col -->
@@ -70,16 +70,13 @@
                                                     <tr>
                                                         <td>{{ $stt }}</td>
                                                         <td>{{ $product['linker']->name }}</td>
-                                                        <td>{{ $product['product']->create_at }}</td>
-                                                        <td><input type="number" class="form-control edit-product-count"
-                                                                min="1" max="100"
-                                                                data-id="{{ $product['product']->id }}"
-                                                                data-cart="{{ $cart->id }}"
+                                                        <td>{{ $product['product']->created_at }}</td>
+                                                        <td><input type="number" style="min-width: 70px"
+                                                                class="form-control edit-product-count" min="1"
+                                                                max="100" data-id="{{ $product['product']->id }}"
+                                                                data-cart="{{ $cart->token }}"
                                                                 value="{{ $product['product']->product_count }}"
-                                                                @if ($cart->status == 1)
-                                                                readonly
-                                                                @endif
-                                                                ></td>
+                                                                @if ($cart->status == 1) readonly @endif></td>
                                                         <td>{{ $product['linker']->price }}</td>
                                                         <td>
                                                             <div class="row">
@@ -94,7 +91,8 @@
                                                             <td>
 
                                                                 <button class="btn btn-danger btn-remove"
-                                                                    data-id="{{ $product['product']->id }}">Xóa</button>
+                                                                    data-id="{{ $product['product']->id }}"
+                                                                    data-cart="{{ $cart->token }}">Xóa</button>
                                                             </td>
                                                         @endif
 
@@ -116,11 +114,22 @@
 
 
                                         <p class="text-muted well well-sm shadow-none" style="margin-top: 10px;">
-                                            @if ($cart->status == 1)
+                                            @if ($cart->status == 2)
                                                 <span class="badge badge-success">Bạn đã thanh toán đơn hàng này rồi</span>
                                             @else
-                                                <span class="badge badge-success">Vui lòng quét mã qr bên dưới để thanh toán
-                                                    đơn hàng</span>
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <span class="badge badge-success">Vui lòng quét mã qr bên dưới để
+                                                            thanh
+                                                            toán
+                                                            đơn hàng</span>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <img src="https://dvtmod.top/qr/?logo=1&amount={{ $price_final }}&comment=Thanhtoan_{{ $cart->token }}&v={{ rand(1111, 99999) }}"
+                                                            alt="">
+                                                    </div>
+
+                                                </div>
                                             @endif
 
                                         </p>
@@ -139,8 +148,8 @@
                                                     <td class="price-final-{{ $cart->id }}">{{ $price_final }}</td>
                                                 </tr>
                                                 <tr>
-                                                    <th>Giảm giá (9.3%)</th>
-                                                    <td>$10.34</td>
+                                                    <th>Giảm giá (0%)</th>
+                                                    <td class="price-final-{{ $cart->id }}">{{ $price_final }}</td>
                                                 </tr>
 
                                             </table>
@@ -156,20 +165,22 @@
                                         <a href="invoice-print.html" rel="noopener" target="_blank"
                                             class="btn btn-default"><i class="fas fa-print"></i> Print</a>
                                         @if ($cart->status == 0)
-                                            <button type="button" class="btn btn-success float-right"><i
-                                                    class="far fa-credit-card"></i> Thanh
-                                                toán ngay
+                                            <button type="button" class="btn btn-success float-right confirm-btn"
+                                                data-cart="{{ $cart->token }}"><i class="far fa-credit-card"></i> Hoàn
+                                                thành đơn
+                                            </button>
+                                        @elseif($cart->status == 1)
+                                            <button type="button" class="btn btn-success float-right pay-btn"
+                                                data-cart="{{ $cart->token }}"><i class="far fa-credit-card"></i> Kiểm tra
+                                                thanh toán
                                             </button>
                                         @else
-                                            <button type="button" class="btn btn-warning float-right"><i
-                                                    class="fas fa-trash"></i> Xóa đơn hàng
+                                            <button type="button" class="btn btn-warning float-right remove-cart"
+                                                data-cart="{{ $cart->token }}"><i class="fas fa-trash"></i> Xóa đơn hàng
                                             </button>
                                         @endif
 
-                                        <button type="button" class="btn btn-primary float-right"
-                                            style="margin-right: 5px;">
-                                            <i class="fas fa-download"></i> Generate PDF
-                                        </button>
+
                                     </div>
                                 </div>
                             </div>
@@ -187,6 +198,166 @@
     <script>
         $(document).ready(function() {
 
+            $(".remove-cart").click(function(e) {
+                e.preventDefault();
+
+                const carttoken = $(this).data("cart");
+
+                $.ajax({
+                    type: "GET",
+                    url: "{{ route('removecart') }}",
+                    data: {
+                        user_token: getCookie("user_token"),
+                        
+                        cart_token: carttoken
+                    },
+                    dataType: "json",
+                    success: function(response) {
+
+                        window.location.reload();
+
+                    },
+
+                    error: function(jqXHR, textStatus, errorThrown) {
+
+                        const obj = JSON.parse(jqXHR.responseText);
+
+                        Toast.fire({
+                            icon: 'warning',
+                            html: '<span class="text-warning">' + obj.message +
+                                '</span>'
+                        })
+                    }
+                });
+            });
+
+            $(".btn-remove").click(function(e) {
+                e.preventDefault();
+
+                const id = $(this).data("id");
+                const carttoken = $(this).data("cart");
+
+                $.ajax({
+                    type: "GET",
+                    url: "{{ route('removeproduct') }}",
+                    data: {
+                        user_token: getCookie("user_token"),
+                        product_id: id,
+                        cart_token: carttoken
+                    },
+                    // dataType: "json",
+                    success: function(response) {
+
+                        console.log(response);
+
+                        window.location.reload();
+
+                    },
+
+                    error: function(jqXHR, textStatus, errorThrown) {
+
+                        const obj = JSON.parse(jqXHR.responseText);
+
+                        Toast.fire({
+                            icon: 'warning',
+                            html: '<span class="text-warning">' + obj.message +
+                                '</span>'
+                        })
+                    }
+                });
+
+            });
+
+            $(".pay-btn").click(function(e) {
+
+
+                const cart = $(this).data("cart");
+                $.ajax({
+                    type: "GET",
+                    url: "{{ route('checkpaycart') }}",
+                    data: {
+                        user_token: getCookie("user_token"),
+
+                        cart_token: cart
+
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.status == "success") {
+
+                            window.location.reload();
+
+                        } else {
+
+                            Swal.fire({
+                                icon: "warning",
+                                title: "Thông báo",
+                                text: "Đơn hàng đang được thanh toán"
+                            });
+                        }
+
+                    },
+
+                    error: function(jqXHR, textStatus, errorThrown) {
+
+                        const obj = JSON.parse(jqXHR.responseText);
+
+                        Toast.fire({
+                            icon: 'warning',
+                            html: '<span class="text-warning">' + obj
+                                .message +
+                                '</span>'
+                        })
+                    }
+                });
+
+            });
+
+            $(".confirm-btn").click(function(e) {
+                e.preventDefault();
+                const cart = $(this).data("cart");
+
+                Swal.fire({
+                    title: 'Bạn có chắc chắn xác nhận đơn này không?',
+                    text: "Đơn hàng sẽ được gửi đến nhà hàng và bạn sẽ không thể thay đổi đơn này",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Có'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+
+                        $.ajax({
+                            type: "GET",
+                            url: "{{ route('confirmcart') }}",
+                            data: {
+                                user_token: getCookie("user_token"),
+
+                                cart_token: cart
+
+                            },
+                            dataType: "json",
+                            success: function(response) {
+                                window.location.reload();
+                            },
+
+                            error: function(jqXHR, textStatus, errorThrown) {
+
+                                const obj = JSON.parse(jqXHR.responseText);
+
+                                Toast.fire({
+                                    icon: 'warning',
+                                    html: '<span class="text-warning">' + obj
+                                        .message +
+                                        '</span>'
+                                })
+                            }
+                        });
+                    }
+                })
+            })
             $(".edit-product-count").change(function(e) {
                 e.preventDefault();
 
@@ -201,20 +372,22 @@
                 const id = $(this).data("id");
                 const cart = $(this).data("cart");
                 $.ajax({
-                    type: "get",
+                    type: "GET",
                     url: "{{ route('updateproduct') }}",
                     data: {
                         user_token: getCookie("user_token"),
                         product_id: id,
-                        new_count: $(this).val()
+                        new_count: $(this).val(),
+                        cart_token: cart
+
                     },
                     dataType: "json",
                     success: function(response) {
-                       
-                        
-                        $(".price-final-"+cart).text(response.price_final);
-                        
-                        
+
+
+                        $(".price-final-" + cart).text(response.price_final);
+
+
                     },
 
                     error: function(jqXHR, textStatus, errorThrown) {

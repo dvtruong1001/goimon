@@ -19,4 +19,15 @@ use App\Http\Controllers\ShoppingCartController;
 
 Route::get("/cart/addtocart", [ShoppingCartController::class,"addToCart"])->name('addtocart');
 Route::get('/cart/updateproduct', [ShoppingCartController::class, "updateProductCart"])->name("updateproduct");
-Route::post("/auth/login", [UserController::class, "tryLogin"])->name('login');
+
+Route::get('/cart/removeproduct', [ShoppingCartController::class, "removeProduct"])->name("removeproduct");
+Route::get('/cart/confirmcart', [ShoppingCartController::class, "confirmCart"])->name("confirmcart");
+
+Route::get('/cart/checkpaycart', [ShoppingCartController::class, "checkPayCart"])->name("checkpaycart");
+
+
+Route::get('/cart/removecart', [ShoppingCartController::class, "removeCart"])->name("removecart");
+
+
+
+Route::post("/auth/login", [UserController::class, "tryLogin"])->name('apilogin');

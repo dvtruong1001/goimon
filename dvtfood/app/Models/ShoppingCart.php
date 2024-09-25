@@ -9,7 +9,7 @@ class ShoppingCart extends Model
 {
     use HasFactory;
 
-    protected $table = "shopping_cart";
+    
     protected $fillable = [
         "token",
         "status",
@@ -17,7 +17,5 @@ class ShoppingCart extends Model
         "owner"
     ];
 
-    protected $casts = [
-        'create_at' => 'datetime',
-    ];
+    
 }
